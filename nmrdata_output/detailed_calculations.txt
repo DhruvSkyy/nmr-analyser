@@ -1,0 +1,36 @@
+Cluster 5
+  Peaks (ppm, 2dp): 0.99, 1.00, 1.02
+  J-values (Hz, 5dp): 7.22051
+  Best multiplicity: t
+  Assigned groups: Unassigned
+
+Cluster 4
+  Peaks (ppm, 2dp): 2.28
+  J-values (Hz, 5dp): None
+  Best multiplicity: singlet
+  Assigned groups: Alkyne , Methyl (double bond/aromatic) , Methyl (CO-CH3)
+
+Cluster 1
+  Peaks (ppm, 2dp): 2.69, 2.71, 2.73, 2.75
+  J-values (Hz, 5dp): 7.22051
+  Best multiplicity: q
+  Assigned groups: Alkyne
+
+Cluster 3
+  Peaks (ppm, 2dp): 7.34, 7.34, 7.34, 7.36, 7.36, 7.36
+  J-values (Hz, 5dp): 1.22987, 5.47490
+  Best multiplicity: dt
+  Assigned groups: Aromatic
+
+Cluster 2
+  Peaks (ppm, 2dp): 7.39, 7.41, 7.43
+  J-values (Hz, 5dp): 7.93463
+  Best multiplicity: t
+  Assigned groups: Aromatic
+
+Cluster 0
+  Peaks (ppm, 2dp): 7.92, 7.92, 7.92, 7.94, 7.94, 7.94, 7.96, 7.96, 7.96
+  J-values (Hz, 5dp): 1.44146, 5.37571
+  Best multiplicity: tt
+  Assigned groups: Aromatic
+
