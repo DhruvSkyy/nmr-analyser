@@ -5,10 +5,10 @@ from pathlib import Path
 from cluster import (
     hierarchical_clustering,
     assign_functional_groups,
-    getcsvcoords,
-    find_noise_threshold,
+    load_csv_coordinates,
+    determine_noise_threshold,
     detect_and_plot_peaks,
-    get_kmeans_distance_threshold,
+    calculate_cluster_count,
 )
 
 from j_val import (
@@ -93,8 +93,8 @@ def write_simple_output(f, peaks, best_match, j_vals, groups):
 
 def main(path, uncertainty=1.0, extra=10):
     """Main function to perform NMR peak analysis with adjustable parameters."""
-    x, y = getcsvcoords(path)
-    noise_threshold = find_noise_threshold(y)
+    x, y = load_csv_coordinates(path)
+    noise_threshold = determine_noise_threshold(y)
     os.makedirs('nmrdata_output', exist_ok=True)
 
     # Peak Detection and Plotting
@@ -106,7 +106,7 @@ def main(path, uncertainty=1.0, extra=10):
         noise_threshold = float(input("Enter new noise threshold: "))
 
     # Clustering and Analysis
-    threshold, k = get_kmeans_distance_threshold(peak_x)
+    k = calculate_cluster_count(peak_x)
     while True:
         k = nmr_peak_analysis(peak_x, k, uncertainty=uncertainty, extra=extra)
         print(f"Number of clusters: {k}")
@@ -117,7 +117,6 @@ def main(path, uncertainty=1.0, extra=10):
         # Set 'extra' to 1 to refine around the user's chosen k
         # This prevents large jumps in cluster numbers and keeps the choice stable
         extra = 1
-
 
 def validate_file(arg):
     if Path(arg).is_file():

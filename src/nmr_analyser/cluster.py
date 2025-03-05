@@ -25,21 +25,31 @@ CHEMICAL_SHIFT_RANGES = {
 }
 
 # Adapted from https://stanford.edu/~cpiech/cs221/handouts/kmeans.html
-# tolerance from https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html
-def kmeans(data, k, max_iter=300, tol=1e-4, random_state=42):
+# tolerance/ maxiter from https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html
+def kmeans_clustering(data, k, max_iter=300, tol=1e-4, random_state=42):
     """
-    Implements K-Means clustering. 
+    Perform K-Means clustering on the given dataset.
     
-    Parameters:
-        data (numpy array): Data points to be clustered.
-        k (int): Number of clusters.
-        max_iter (int): Maximum number of iterations.
-        tol (float): Tolerance for convergence.
-        random_state (int): Seed for random initialisation.
+    Parameters
+    ----------
+    data : numpy.ndarray
+        Data points to be clustered, shape (n_samples, n_features).
+    k : int
+        Number of clusters to form.
+    max_iter : int, optional
+        Maximum number of iterations of the k-means algorithm, by default 300.
+    tol : float, optional
+        Tolerance to declare convergence, by default 1e-4.
+    random_state : int, optional
+        Random seed for reproducibility, by default 42.
     
-    Returns:
-        tuple: Cluster labels and centroids as numpy arrays.
-    """ 
+    Returns
+    -------
+    labels : numpy.ndarray
+        Cluster labels for each data point.
+    centroids : numpy.ndarray
+        Coordinates of cluster centroids.
+    """
     np.random.seed(random_state)
     centroids = data[np.random.choice(data.shape[0], k, replace=False)].astype(float)
     for _ in range(max_iter):
@@ -53,43 +63,54 @@ def kmeans(data, k, max_iter=300, tol=1e-4, random_state=42):
             break
     return labels, centroids
 
-def hierarchical_clustering(peaks, k, linkage='ward'):
+def hierarchical_clustering(peaks, n_clusters, linkage='ward'):
     """
-    Clusters NMR peaks using hierarchical (agglomerative) clustering,
-    assigns functional groups, and classifies multiplets.
+    Perform hierarchical (agglomerative) clustering on NMR peaks.
     
-    Parameters:
-        peaks (numpy array): Array of peak positions (1D).
-        k (int): Number of clusters to find.
+    Parameters
+    ----------
+    peaks : numpy.ndarray
+        Array of peak positions (1D).
+    n_clusters : int
+        Number of clusters to find.
+    linkage : str, optional
+        Linkage criterion ('ward', 'complete', 'average', 'single'), by default 'ward'.
 
-    Returns:
-        None: Prints the analysis results.
+    Returns
+    -------
+    labels : numpy.ndarray
+        Cluster labels for each peak.
+    centroids : numpy.ndarray
+        Mean position of each cluster.
     """
     data = peaks.reshape(-1, 1)
-    
-    hc = AgglomerativeClustering(n_clusters=k, linkage=linkage)
+    hc = AgglomerativeClustering(n_clusters=n_clusters, linkage=linkage)
     labels = hc.fit_predict(data)
-    
-    cluster_dict = {i: [] for i in range(k)}
+    cluster_dict = {i: [] for i in range(n_clusters)}
     for peak, lbl in zip(peaks, labels):
         cluster_dict[lbl].append(peak)
-    
-    clusters = [np.mean(val) for key, val in cluster_dict.items()]
-    
-    return labels, clusters
+    centroids = np.array([np.mean(val) for val in cluster_dict.values()])
+    return labels, centroids
 
-def getcsvcoords(path):
+
+def load_csv_coordinates(file_path):
     """
-    Reads a CSV file and extracts x and y coordinates.
-    
-    Parameters:
-        path (str): Path to the CSV file.
-    
-    Returns:
-        Two numpy arrays representing x and y values.
+    Load x and y coordinates from a CSV file.
+
+    Parameters
+    ----------
+    file_path : str
+        Path to the CSV file.
+
+    Returns
+    -------
+    x : numpy.ndarray
+        X coordinates.
+    y : numpy.ndarray
+        Y coordinates.
     """
     x, y = [], []
-    with open(path) as file:
+    with open(file_path) as file:
         next(file)  # Skip header
         for line in file: 
             parts = line.split()
@@ -97,128 +118,138 @@ def getcsvcoords(path):
             y.append(float(parts[1]))
     return np.array(x), np.array(y)
 
-def find_noise_threshold(y_values, k=2):
+def determine_noise_threshold(y_values, n_clusters=2):
     """
-    Uses K-Means clustering to find a threshold separating noise from signal in peak heights.
+    Calculate a threshold to differentiate noise from signals using K-Means clustering.
 
-    Parameters:
-        y_values (array-like): 1D array of y-values (peak heights).
-        k (int): Number of clusters (default is 2: noise vs signal).
+    Parameters
+    ----------
+    y_values : array-like
+        1D array of y-values (peak heights).
+    n_clusters : int, optional
+        Number of clusters to form, by default 2 (noise vs signal).
 
-    Returns:
-        float: Threshold value separating noise from peaks.
+    Returns
+    -------
+    float
+        Threshold value separating noise from peaks.
     """
     if len(y_values) < 2:
         print("Need at least two data points to apply clustering.")
         return None
-
     y_values = np.array(y_values).reshape(-1, 1)
-    labels, centroids = kmeans(y_values, k)
-    sorted_centroids = np.sort(centroids.ravel())
-    threshold = sorted_centroids[0]
-
+    labels, centroids = kmeans_clustering(y_values, n_clusters)
+    threshold = np.sort(centroids.ravel())[0]
     return threshold
 
-def find_peaks(y, height=None, distance=1, window_size=10):
+def find_peaks(y, height):
     """
-    Identifies peaks in a 1D data array using local maxima detection.
+    Identify peaks in a 1D data array using local maxima detection.
     
-    Parameters:
-        y (list or numpy array): Input data.
-        height (float, optional): Minimum peak height.
-        distance (int, optional): Minimum separation between peaks.
-        window_size (int, optional): Smoothing window size.
-    
-    Returns:
-        tuple: List of peak indices and smoothed data.
-    """
-    y = np.array(y, dtype=float)
+    Parameters
+    ----------
+    y : numpy.ndarray
+        Input data array.
+    min_height : float
+        Minimum height for peak detection.
 
-    if height is None:
-        height = np.mean(y)
+    Returns
+    -------
+    list
+        Indices of detected peaks.
+    """
 
     peaks = [i for i in range(1, len(y) - 1)
              if y[i] > height and y[i] > y[i - 1] and y[i] > y[i + 1]]
     
     return peaks
 
-def detect_and_plot_peaks(x, y, threshold_baseline=5000000):
+def detect_and_plot_peaks(x, y, threshold_baseline, xlim=None):
     """
-    Detects and plots peaks in the given data.
+    Detects and plots peaks in the given data with a wide, detailed NMR spectrum style.
     
-    Parameters:
-        x (array-like): X-axis data.
-        y (array-like): Y-axis data.
-        threshold_baseline (float): Minimum height for peak detection.
-    
-    Returns:
-        tuple: Arrays of peak x and y values.
-    """
-    x = np.array(x)
-    y = np.array(y)
-    xhigh = max(x)
-    xlow = min(x)
-    peaks = find_peaks(y, threshold_baseline)
-    peak_x = x[peaks]
-    peak_y = y[peaks]
-    
-    # Plot the data
-    plt.figure(figsize=(15, 5))
-    plt.plot(x, y, marker="o", linestyle="-", markersize=1, label="Data")
-    plt.scatter(peak_x, peak_y, color="red", marker="x", label="Peaks")  # Highlight peaks
-    plt.axhline(y=threshold_baseline, color='gray', linestyle="--", label="Threshold")  # Threshold line
-    
-    # Adjust x limits
-    plt.xlim(xhigh, xlow)
+    Parameters
+    ----------
+    x : numpy.ndarray
+        X-axis data (Chemical shift in ppm).
+    y : numpy.ndarray
+        Y-axis data (Intensity).
+    threshold_baseline : float
+        Minimum height for peak detection.
+    xlim : tuple of (float, float), optional
+        X-axis limits as (min, max). Defaults to the full range of x data.
 
-    # Labels and title
-    plt.xlabel("X-axis")
-    plt.ylabel("Y-axis")
-    plt.title("Plot of Data with Peak Detection")
-    plt.legend()
+    Returns
+    -------
+    peak_x : numpy.ndarray
+        X coordinates of detected peaks.
+    peak_y : numpy.ndarray
+        Y coordinates of detected peaks.
+    """
+    xhigh, xlow = max(x), min(x)
+    peaks = find_peaks(y, height=threshold_baseline)
+    peak_x, peak_y = x[peaks], y[peaks]
     
-    plt.show(block=False)  # Non-blocking plot
-    plt.savefig('nmrdata_output/output.jpg')
+    plt.figure(figsize=(12, 8))
+    plt.plot(x, y, linestyle="-", linewidth=0.8, color="black", label="NMR Spectrum")
+    plt.scatter(peak_x, peak_y, color="red", marker="x", s=50, label="Detected Peaks")
+    plt.axhline(y=threshold_baseline, color='gray', linestyle="--", linewidth=1, label="Threshold")
+    
+    if xlim:
+        plt.xlim(xlim[1], xlim[0]) 
+    else:
+        plt.xlim(xhigh, xlow)
+    
+    plt.xlabel("Chemical Shift (ppm)", fontsize=12)
+    plt.ylabel("Intensity (a.u.)", fontsize=12)
+    plt.title("1H NMR Spectrum", fontsize=14)
+    plt.legend(loc="upper right", fontsize=10)
+    
+    plt.savefig('nmrdata_output/compact_nmr_output.jpg', dpi=300, bbox_inches='tight')
+    plt.show(block=False)
     
     return peak_x, peak_y
 
 
-def get_kmeans_distance_threshold(peaks):
+def calculate_cluster_count(peaks):
     """
-    Computes a distance threshold for peak clustering using K-Means.
+    Estimate the number of clusters in peak data using K-Means on peak distances.
     
-    Parameters:
-        peaks (numpy array): Sorted array of peak positions.
-    
-    Returns:
-        tuple: Computed threshold and count of distances above the threshold.
+    Parameters
+    ----------
+    peaks : numpy.ndarray
+        Sorted array of peak positions.
+
+    Returns
+    -------
+    count: int
+        Estimated count of clusters based on distance thresholding.
     """
     peaks = np.sort(np.asarray(peaks, dtype=float))
     if len(peaks) < 2:
         print("Need at least two peaks to measure distances.")
-        return None, 0
-
+        return 0
     distances = np.diff(peaks)
-    if len(distances) == 0:
-        print("Not enough distances to compute a threshold.")
-        return None, 0
-
-    labels, centroids = kmeans(distances.reshape(-1, 1), k=2)
-    # maybe try use ward clustering over k means, i tried k means works same or better. 
+    labels, centroids = kmeans_clustering(distances.reshape(-1, 1), k=2)
     threshold = np.min(centroids)
-
     count = np.sum(distances > threshold)
-    return threshold, count
+    return count
 
 def assign_functional_groups(peak):
     """
-    Determines possible functional groups based on a given chemical shift.
-    
-    Parameters:
-        peak (float): Chemical shift value.
-    
-    Returns:
-        list: Possible functional groups.
+    Determine possible functional groups based on a chemical shift value.
+
+    Parameters
+    ----------
+    peak : float
+        Chemical shift value to classify.
+
+    Returns
+    -------
+    list
+        List of possible functional groups corresponding to the chemical shift.
+        Returns ["Unassigned"] if no match is found.
     """
     possible_groups = [group for group, (low, high) in CHEMICAL_SHIFT_RANGES.items() if low <= peak <= high]
     return possible_groups if possible_groups else ["Unassigned"]
+
