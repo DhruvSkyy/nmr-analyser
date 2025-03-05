@@ -1,36 +1,52 @@
-Cluster 5
-  Peaks (ppm, 2dp): 0.99, 1.00, 1.02
-  J-values (Hz, 5dp): 7.22051
-  Best multiplicity: t
-  Assigned groups: Unassigned
+Peaks: 1.13, 1.14, 1.15, 1.15, 1.16, 1.17, 1.18, 1.18, 1.21, 1.22, 1.23, 1.24, 1.25
+J-values: None
+Groups: Unassigned
 
-Cluster 4
-  Peaks (ppm, 2dp): 2.28
-  J-values (Hz, 5dp): None
-  Best multiplicity: singlet
-  Assigned groups: Alkyne , Methyl (double bond/aromatic) , Methyl (CO-CH3)
+Peaks: 1.49, 1.51, 1.52, 1.54, 1.62
+J-values: None
+Groups: Unassigned
 
-Cluster 1
-  Peaks (ppm, 2dp): 2.69, 2.71, 2.73, 2.75
-  J-values (Hz, 5dp): 7.22051
-  Best multiplicity: q
-  Assigned groups: Alkyne
+Peaks: 0.83, 0.84, 0.85, 0.86, 0.88, 0.90, 0.90
+J-values: None
+Groups: Unassigned
 
-Cluster 3
-  Peaks (ppm, 2dp): 7.34, 7.34, 7.34, 7.36, 7.36, 7.36
-  J-values (Hz, 5dp): 1.22987, 5.47490
-  Best multiplicity: dt
-  Assigned groups: Aromatic
+Peaks: 7.32, 7.32, 7.33, 7.33, 7.33, 7.35, 7.35, 7.36, 7.37, 7.38, 7.39, 7.40, 7.40
+J-values: None
+Groups: Aromatic
 
-Cluster 2
-  Peaks (ppm, 2dp): 7.39, 7.41, 7.43
-  J-values (Hz, 5dp): 7.93463
-  Best multiplicity: t
-  Assigned groups: Aromatic
+Peaks: 1.26, 1.27, 1.27, 1.28, 1.29, 1.30, 1.30, 1.31, 1.32, 1.32, 1.34, 1.35
+J-values: None
+Groups: Unassigned
 
-Cluster 0
-  Peaks (ppm, 2dp): 7.92, 7.92, 7.92, 7.94, 7.94, 7.94, 7.96, 7.96, 7.96
-  J-values (Hz, 5dp): 1.44146, 5.37571
-  Best multiplicity: tt
-  Assigned groups: Aromatic
+Peaks: 7.25, 7.25, 7.26, 7.27, 7.28, 7.28, 7.30, 7.30
+J-values: None
+Groups: Aromatic
+
+Peaks: 4.87, 4.88, 4.89, 4.90, 4.91, 4.92, 4.93, 4.94
+J-values: None
+Groups: Alkene , Acetal
+
+Peaks: 7.54, 7.55, 7.55, 7.57, 7.57, 7.58, 7.59, 7.60, 7.60
+J-values: None
+Groups: Aromatic
+
+Peaks: 1.86, 1.87
+J-values: 4.27193
+Groups: Methyl (double bond/aromatic) , Methyl (CO-CH3)
+
+Peaks: 7.95, 7.95, 7.96, 7.97, 7.98, 7.98, 7.99
+J-values: None
+Groups: Aromatic
+
+Peaks: 7.44, 7.44, 7.45, 7.47, 7.47, 7.49, 7.49
+J-values: None
+Groups: Aromatic
+
+Peaks: 2.60, 2.61
+J-values: 3.51806
+Groups: Alkyne , Methyl (CO-CH3)
+
+Peaks: 2.04
+J-values: None
+Groups: 
 
