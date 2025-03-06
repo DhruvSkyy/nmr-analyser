@@ -98,7 +98,7 @@ def factorize_multiplicity(num_peaks: int) -> list[str]:
     
     return final_labels if final_labels else ["multiplet"]
 
-# Allow frequency for calculating j values to be changed asap - from argparse as well 
+
 def calculate_j_values(peaks, frequency=400.0):
     """
     Calculate J coupling values in Hertz (Hz) from a list of chemical shift peaks.

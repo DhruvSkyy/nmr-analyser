@@ -13,7 +13,7 @@ from cluster import (
 
 from j_val import (
     factorize_multiplicity,
-    compute_j_values,
+    calculate_j_values,
     match_j_values_to_multiplicity,
 )
 
@@ -38,15 +38,15 @@ def nmr_peak_analysis(peaks, k, uncertainty=1.0, extra=10):
         if multiplet_count < min_multiplets:
             min_multiplets, best_k = multiplet_count, current_k
             best_cluster_data = cluster_data
+            best_clusters = clusters
 
-    # Use precomputed best cluster data to avoid reprocessing
     with open(detailed_path, "a") as f_detailed, open(simple_path, "a") as f_simple:
         for cluster_peaks, best_match, avg_j_values, assigned_groups in best_cluster_data:
             write_detailed_output(f_detailed, cluster_peaks, avg_j_values, assigned_groups)
             write_simple_output(f_simple, cluster_peaks, best_match, avg_j_values, assigned_groups)
 
     print(f"Analysis complete. Files written to: {detailed_path}, {simple_path}")
-    return best_k
+    return best_k, best_clusters
 
 def evaluate_clusters(peaks, k, uncertainty):
     """Evaluates clusters and returns multiplet count, cluster data, and processed information."""
@@ -64,16 +64,16 @@ def evaluate_clusters(peaks, k, uncertainty):
             multiplet_count += 1
     return multiplet_count, clusters, cluster_data
 
-
-def process_cluster(cluster_peaks, uncertainty):
+def process_cluster(cluster_peaks, uncertainty, frequency=400.0):
     """Processes cluster data and returns multiplicity, J-values, and functional groups."""
     if len(cluster_peaks) == 1:
         return "singlet", [], []
-    j_vals = compute_j_values(cluster_peaks, freq=400.0)
+    j_vals = calculate_j_values(cluster_peaks, frequency=frequency)
     all_mults = factorize_multiplicity(len(cluster_peaks))
     best_match, avg_j_values = match_j_values_to_multiplicity(j_vals, all_mults, uncertainty=uncertainty)
     assigned_groups = assign_functional_groups(cluster_peaks[0])
     return best_match, avg_j_values, assigned_groups
+
 
 def write_detailed_output(f, peaks, j_vals, groups):
     """Writes detailed peak, J-value, and group info to file."""
@@ -91,7 +91,7 @@ def write_simple_output(f, peaks, best_match, j_vals, groups):
     f.write(f"Peaks: {range_str}\nMultiplicity: {best_match}\nJ-values: {j_vals_str}\nGroups: {groups_str}\n\n")
 
 
-def main(path, uncertainty=1.0, extra=10):
+def main(path, uncertainty=1.0, extra=10, frequency=400.0):
     """Main function to perform NMR peak analysis with adjustable parameters."""
     x, y = load_csv_coordinates(path)
     noise_threshold = determine_noise_threshold(y)
@@ -108,15 +108,14 @@ def main(path, uncertainty=1.0, extra=10):
     # Clustering and Analysis
     k = calculate_cluster_count(peak_x)
     while True:
-        k = nmr_peak_analysis(peak_x, k, uncertainty=uncertainty, extra=extra)
+        k, clusters  = nmr_peak_analysis(peak_x, k, uncertainty=uncertainty, extra=extra)
+        detect_and_plot_peaks(x, y, threshold_baseline=noise_threshold, clusters=clusters)
         print(f"Number of clusters: {k}")
         if input("Is this number of clusters acceptable? (y/n): ").strip().lower() == 'y':
             break
-        # If the automated guess is not acceptable, switch to manual cluster control
         k = int(input("Enter preferred number of clusters: "))
-        # Set 'extra' to 1 to refine around the user's chosen k
-        # This prevents large jumps in cluster numbers and keeps the choice stable
         extra = 1
+
 
 def validate_file(arg):
     if Path(arg).is_file():
@@ -129,6 +128,7 @@ if __name__ == "__main__":
     parser.add_argument("--file", type=validate_file, required=True, help="Input file path")
     parser.add_argument("--extra", type=int, default=10, help="Extra clusters to consider during analysis")
     parser.add_argument("--uncertainty", type=float, default=1.0, help="Uncertainty tolerance for multiplicity matching")
+    parser.add_argument("--frequency", type=float, default=400.0, help="NMR frequency (optional, default is 400.0 MHz)")
     args = parser.parse_args()
-    main(args.file, uncertainty=args.uncertainty, extra=args.extra)
+    main(args.file, uncertainty=args.uncertainty, extra=args.extra, frequency=args.frequency)
 

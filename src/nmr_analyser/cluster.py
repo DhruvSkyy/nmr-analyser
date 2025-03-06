@@ -164,9 +164,10 @@ def find_peaks(y, height):
     
     return peaks
 
-def detect_and_plot_peaks(x, y, threshold_baseline, xlim=None):
+def detect_and_plot_peaks(x, y, threshold_baseline, xlim=None, clusters=None):
     """
     Detects and plots peaks in the given data with a wide, detailed NMR spectrum style.
+    Optionally highlights peaks in different colours based on clusters.
     
     Parameters
     ----------
@@ -178,6 +179,9 @@ def detect_and_plot_peaks(x, y, threshold_baseline, xlim=None):
         Minimum height for peak detection.
     xlim : tuple of (float, float), optional
         X-axis limits as (min, max). Defaults to the full range of x data.
+    clusters : dict, optional
+        A dictionary where keys are cluster labels and values are lists of peak values.
+        Peaks in different clusters are plotted in different colours.
 
     Returns
     -------
@@ -189,27 +193,38 @@ def detect_and_plot_peaks(x, y, threshold_baseline, xlim=None):
     xhigh, xlow = max(x), min(x)
     peaks = find_peaks(y, height=threshold_baseline)
     peak_x, peak_y = x[peaks], y[peaks]
-    
+
     plt.figure(figsize=(12, 8))
     plt.plot(x, y, linestyle="-", linewidth=0.8, color="black", label="NMR Spectrum")
-    plt.scatter(peak_x, peak_y, color="red", marker="x", s=50, label="Detected Peaks")
     plt.axhline(y=threshold_baseline, color='gray', linestyle="--", linewidth=1, label="Threshold")
     
+    # Default colour map for clusters
+    colours = plt.cm.get_cmap('tab10', len(clusters) if clusters else 1)
+    
+    if clusters:
+        for i, (label, peak_values) in enumerate(clusters.items()):
+            mask = np.isin(peak_x, peak_values)
+            cluster_x = peak_x[mask]
+            cluster_y = peak_y[mask]
+            plt.scatter(cluster_x, cluster_y, color=colours(i), marker="x", s=50)
+    else:
+        plt.scatter(peak_x, peak_y, color="red", marker="x", s=50, label="Detected Peaks")
+
     if xlim:
         plt.xlim(xlim[1], xlim[0]) 
     else:
         plt.xlim(xhigh, xlow)
-    
+
     plt.xlabel("Chemical Shift (ppm)", fontsize=12)
     plt.ylabel("Intensity (a.u.)", fontsize=12)
     plt.title("1H NMR Spectrum", fontsize=14)
-    plt.legend(loc="upper right", fontsize=10)
-    
+    if not clusters:
+        plt.legend(loc="upper right", fontsize=10)
+
     plt.savefig('nmrdata_output/compact_nmr_output.jpg', dpi=300, bbox_inches='tight')
     plt.show(block=False)
     
     return peak_x, peak_y
-
 
 def calculate_cluster_count(peaks):
     """
@@ -233,7 +248,8 @@ def calculate_cluster_count(peaks):
     labels, centroids = kmeans_clustering(distances.reshape(-1, 1), k=2)
     threshold = np.min(centroids)
     count = np.sum(distances > threshold)
-    return count
+    
+    return int(count)
 
 def assign_functional_groups(peak):
     """
