@@ -30,7 +30,7 @@ def nmr_peak_analysis(peaks, k, uncertainty=1.0, extra=10):
 
     max_k = min(k + extra, len(peaks))
     min_multiplets, best_k = float('inf'), k
-    for current_k in range(k, max_k):
+    for current_k in range(k, max_k + 1):
         multiplet_count, clusters, cluster_data = evaluate_clusters(peaks, current_k, uncertainty)
         if multiplet_count < min_multiplets:
             min_multiplets, best_k = multiplet_count, current_k

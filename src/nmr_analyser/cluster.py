@@ -241,9 +241,11 @@ def calculate_cluster_count(peaks):
         Estimated count of clusters based on distance thresholding.
     """
     peaks = np.sort(np.asarray(peaks, dtype=float))
-    if len(peaks) < 2:
-        print("Need at least two peaks to measure distances.")
-        return 0
+
+    # Handle case where there's only two or less peaks
+    if len(peaks) < 3:
+        return len(peaks)
+    
     distances = np.diff(peaks)
     labels, centroids = kmeans_clustering(distances.reshape(-1, 1), k=2)
     threshold = np.min(centroids)
