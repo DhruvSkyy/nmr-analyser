@@ -22,14 +22,14 @@ def factorize_multiplicity(num_peaks: int) -> list[str]:
 
     Rules
     -----
-    - If num_peaks > 36, returns ["multiple"].
+    - If num_peaks > 36, returns ["multiplet"].
     - If num_peaks == 1, returns ["s"] (singlet).
     - If num_peaks <= 7:
         - Uses possible factors [2..7] with specific labels.
         - Generates all permutations of valid factorizations.
     - If num_peaks > 7:
         - Restricts factors to [2, 3, 4] with labels ("d", "t", "q").
-        - Returns ["multiple"] if no valid factorization is found.
+        - Returns ["multiplet"] if no valid factorization is found.
 
     Examples
     --------
@@ -42,12 +42,12 @@ def factorize_multiplicity(num_peaks: int) -> list[str]:
     >>> factorize_multiplicity(1)
     ['s']
     >>> factorize_multiplicity(40)
-    ['multiple']
+    ['multiplet']
     >>> factorize_multiplicity(11)
-    ['multiple']
+    ['multiplet']
     """
     if num_peaks > 36:
-        return ["multiple"]
+        return ["multiplet"]
     if num_peaks == 1:
         return ["s"]
 
@@ -333,3 +333,20 @@ def match_j_values_to_multiplicity(j_values, multiplicities, uncertainty=1.0):
         return matched_multiplicity, avg_j_values
     return 'multiplet', None
 
+def calculate_j_vals(peaks, multiplicity):
+    """
+    Calculate J value of peaks based on predicted multiplicity
+
+    Args:
+        peaks (_type_): _description_
+        multiplicity (_type_): _description_
+    """
+    
+    # i think for single multiplicities like doublet, triplet, quintet etc. just adjacent is fine
+    # complexity comes from like dd, dt, td, tt etc. 
+    
+    # maybe use like division, like if dt, 2x3, first divide by three (the len of peaks) and should have two groups of three
+    # if tt, 3x3 should divide by three and have 3 groups of 3, then for each inner group get adjacemt values and use those
+    # then for j values in between groups, take the mean of each group compared to next group and thats that j value
+    # this algorithm works well I think 
+    

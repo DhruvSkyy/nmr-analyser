@@ -1,3 +1,4 @@
+import re 
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.cluster import AgglomerativeClustering
@@ -168,7 +169,7 @@ def detect_and_plot_peaks(x, y, threshold_baseline, xlim=None, clusters=None):
     """
     Detects and plots peaks in the given data with a wide, detailed NMR spectrum style.
     Optionally highlights peaks in different colours based on clusters.
-    
+
     Parameters
     ----------
     x : numpy.ndarray
@@ -189,6 +190,8 @@ def detect_and_plot_peaks(x, y, threshold_baseline, xlim=None, clusters=None):
         X coordinates of detected peaks.
     peak_y : numpy.ndarray
         Y coordinates of detected peaks.
+    y_axis_scale : int
+        The exponent of the scientific notation scale for the y-axis (e.g., -3 if the axis shows ×10^-3).
     """
     xhigh, xlow = max(x), min(x)
     peaks = find_peaks(y, height=threshold_baseline)
@@ -197,7 +200,7 @@ def detect_and_plot_peaks(x, y, threshold_baseline, xlim=None, clusters=None):
     plt.figure(figsize=(12, 8))
     plt.plot(x, y, linestyle="-", linewidth=0.8, color="black", label="NMR Spectrum")
     plt.axhline(y=threshold_baseline, color='gray', linestyle="--", linewidth=1, label="Threshold")
-    
+
     # Default colour map for clusters
     colours = plt.cm.get_cmap('tab10', len(clusters) if clusters else 1)
     
@@ -224,7 +227,18 @@ def detect_and_plot_peaks(x, y, threshold_baseline, xlim=None, clusters=None):
     plt.savefig('nmrdata_output/compact_nmr_output.jpg', dpi=300, bbox_inches='tight')
     plt.show(block=False)
     
-    return peak_x, peak_y
+     # Get the y-axis scaling from the scientific notation
+    ax = plt.gca()
+    offset_text = ax.yaxis.get_offset_text().get_text()
+
+    # Simple extraction of the exponent from scientific notation like "1e-3"
+    try:
+        _, exponent = offset_text.split('e')
+        y_axis_scale = int(exponent)
+    except ValueError:
+        y_axis_scale = 0  # No scientific notation used
+    
+    return peak_x, peak_y, y_axis_scale
 
 def calculate_cluster_count(peaks):
     """
