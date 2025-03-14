@@ -13,8 +13,7 @@ from cluster import (
 
 from j_val import (
     factorize_multiplicity,
-    calculate_j_values,
-    match_j_values_to_multiplicity,
+    match_peaks_to_multiplicity,
 )
 
 def nmr_peak_analysis(peaks, k, frequency, uncertainty=1.0, extra=10):
@@ -80,12 +79,18 @@ def evaluate_clusters(peaks, k, uncertainty, frequency):
 def process_cluster(cluster_peaks, uncertainty, frequency):
     if len(cluster_peaks) == 1:
         return "s", [], [], [], []
-    j_vals = calculate_j_values(cluster_peaks, frequency=frequency)
-    all_mults = factorize_multiplicity(len(cluster_peaks))
-    best_match, avg_j_values = match_j_values_to_multiplicity(j_vals, all_mults, uncertainty=uncertainty)
-    assigned_groups = assign_functional_groups(cluster_peaks[0])
-    return best_match, avg_j_values, assigned_groups, all_mults, j_vals
 
+    all_mults = factorize_multiplicity(len(cluster_peaks))
+    best_match, matched_j_vals, raw_j_vals = match_peaks_to_multiplicity(
+        peaks=cluster_peaks, 
+        multiplicities=all_mults, 
+        frequency=frequency, 
+        uncertainty=uncertainty
+    )
+
+    assigned_groups = assign_functional_groups(cluster_peaks[0])
+
+    return best_match, matched_j_vals, assigned_groups, all_mults, raw_j_vals
 
 def write_detailed_output(f, peaks, j_vals, groups, all_multiplicities):
     peaks_str = ', '.join(f"{p:.5f}" for p in peaks)
