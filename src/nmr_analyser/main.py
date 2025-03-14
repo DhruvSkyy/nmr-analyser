@@ -88,7 +88,7 @@ def process_cluster(cluster_peaks, uncertainty, frequency):
 
 
 def write_detailed_output(f, peaks, j_vals, groups, all_multiplicities):
-    peaks_str = ', '.join(f"{p:.2f}" for p in peaks)
+    peaks_str = ', '.join(f"{p:.5f}" for p in peaks)
     j_vals_str = ', '.join(f"{j:.5f}" for j in j_vals) if len(j_vals) > 0 else "None"
     groups_str = " , ".join(groups)
     mult_str = ', '.join(str(m) for m in all_multiplicities) if all_multiplicities else "None"

@@ -1,133 +1,4 @@
 import numpy as np
-from sklearn.cluster import DBSCAN
-
-def factorize_multiplicity(num_peaks: int) -> list[str]:
-    """
-    Algorithm to generate all possible multiplicity labels for a given number of peaks using backtracking.
-    
-    Parameters
-    ----------
-    num_peaks : int
-        The number of peaks to factorize.
-
-    Returns
-    -------
-    list of str
-        A sorted list of possible multiplicity labels or ["multiple"] if no valid factorisation exists.
-        
-    Algorithm
-    ---------
-    This function uses a backtracking algorithm to explore all possible factorizations of `num_peaks` 
-    using specific factor ranges and maps these factorizations to their respective labels. 
-
-    Rules
-    -----
-    - If num_peaks > 36, returns ["multiplet"].
-    - If num_peaks == 1, returns ["s"] (singlet).
-    - If num_peaks <= 7:
-        - Uses possible factors [2..7] with specific labels.
-        - Generates all permutations of valid factorizations.
-    - If num_peaks > 7:
-        - Restricts factors to [2, 3, 4] with labels ("d", "t", "q").
-        - Returns ["multiplet"] if no valid factorization is found.
-
-    Examples
-    --------
-    >>> factorize_multiplicity(4)
-    ['dd', 'q']
-    >>> factorize_multiplicity(6)
-    ['dt', 'hex', 'td']
-    >>> factorize_multiplicity(8)
-    ['ddd', 'dq', 'qd']
-    >>> factorize_multiplicity(1)
-    ['s']
-    >>> factorize_multiplicity(40)
-    ['multiplet']
-    >>> factorize_multiplicity(11)
-    ['multiplet']
-    """
-    if num_peaks > 36:
-        return ["multiplet"]
-    if num_peaks == 1:
-        return ["s"]
-
-    FACTORS_UP_TO_7 = {
-        2: "d",
-        3: "t",
-        4: "q",
-        5: "quintet",
-        6: "hex",
-        7: "hept"
-    }
-    FACTORS_ABOVE_7 = {
-        2: "d",
-        3: "t",
-        4: "q"
-    }
-
-    if num_peaks <= 7:
-        factor_dict = FACTORS_UP_TO_7
-        factor_range = range(2, 8)
-    else:
-        factor_dict = FACTORS_ABOVE_7
-        factor_range = range(2, 5)
-
-    results = []
-
-    def backtrack(current, path):
-        if current == 1:
-            results.append(path[:])
-            return
-        for f in factor_range:
-            if current % f == 0:
-                path.append(f)
-                backtrack(current // f, path)
-                path.pop()
-
-    backtrack(num_peaks, [])
-
-    labels = set()
-    for seq in results:
-        label_str = "".join(factor_dict[f] for f in seq)
-        labels.add(label_str)
-
-    if num_peaks <= 7 and num_peaks in factor_dict:
-        labels.add(factor_dict[num_peaks])
-
-    final_labels = sorted(labels)
-    
-    return final_labels if final_labels else ["multiplet"]
-
-
-def calculate_j_values(peaks, frequency=400.0):
-    """
-    Calculate J coupling values in Hertz (Hz) from a list of chemical shift peaks.
-
-    Parameters
-    ----------
-    peaks : list of float
-        Chemical shift peaks in parts per million (ppm).
-    frequency : float, optional
-        Spectrometer frequency in MHz, default is 400.0 MHz.
-
-    Returns
-    -------
-    list of float
-        J values in Hz, calculated as the difference between consecutive peaks multiplied by the frequency.
-
-    Examples
-    --------
-    >>> calculate_j_values([1.0, 2.0, 2.5], frequency=400.0)
-    [400.0, 200.0]
-
-    """
-    if len(peaks) < 2:
-        return []
-    sorted_peaks = sorted(peaks)
-    diffs_ppm = np.diff(sorted_peaks)
-    j_values = diffs_ppm * frequency
-    return j_values
-
 
 def multiplicity_to_line_count(multiplicity):
     """
@@ -260,83 +131,11 @@ def generate_j_pattern(multiplicity):
                 break
     return ranks
 
-def cluster_and_rank_j_values(j_values, uncertainty=1.0):
-    """
-    Cluster J values based on uncertainty and output a ranked list of clusters.
-
-    Parameters
-    ----------
-    j_values : list of float
-        J coupling values in Hz.
-    uncertainty : float, optional
-        Clustering threshold in Hz, default is 1.0 Hz.
-
-    Returns
-    -------
-    list of int
-        Ranked J values based on cluster ordering.
-
-    Examples
-    --------
-    >>> cluster_and_rank_j_values([7.1, 7.1, 9], uncertainty=1)
-    [1, 1, 2]
-
-    Notes
-    -----
-    Clusters J values using DBSCAN with the specified uncertainty as the clustering radius.
-    Outputs a ranked list of clusters based on ascending mean J values.
-    """
-    j_values_reshaped = np.array(j_values).reshape(-1, 1)
-    clustering = DBSCAN(eps=uncertainty, min_samples=1).fit(j_values_reshaped)
-    labels = clustering.labels_
-    unique_labels = np.unique(labels)
-    sorted_clusters = sorted(unique_labels, key=lambda lbl: np.mean(j_values_reshaped[labels == lbl]))
-    rank_map = {label: rank + 1 for rank, label in enumerate(sorted_clusters)}
-    return [rank_map[label] for label in labels]
-
-
-def match_j_values_to_multiplicity(j_values, multiplicities, uncertainty=1.0):
-    """
-    Match observed J values to expected multiplicity patterns.
-
-    Parameters
-    ----------
-    j_values : list of float
-        Observed J values in Hz.
-    multiplicities : list of str
-        Expected multiplicity patterns (e.g., ['d', 't', 'q']).
-    uncertainty : float, optional
-        Uncertainty threshold in Hz for J value clustering, default is 1.0 Hz.
-
-    Returns
-    -------
-    tuple (str, list of float or None)
-        Matched multiplicity and averaged J values, or 'multiplet' if ambiguous.
-
-    Notes
-    -----
-    Uses `cluster_and_rank_j_values` and `generate_j_pattern` to compare observed and expected patterns.
-    If multiple patterns match, 'multiplet' is returned. Averaged J values are provided if a match is unique.
-    """
-    if multiplicities[0] == 'multiplet':
-        return 'multiplet', None
-    j_ranks = cluster_and_rank_j_values(j_values, uncertainty)
-    matches = []
-    for multiplicity in multiplicities:
-        pattern = generate_j_pattern(multiplicity)
-        if j_ranks == pattern:
-            matches.append(multiplicity)
-    if len(matches) == 1:
-        matched_multiplicity = matches[0]
-        unique_ranks = np.unique(j_ranks)
-        avg_j_values = [np.mean([j for j, rank in zip(j_values, j_ranks) if rank == ur]) for ur in unique_ranks]
-        return matched_multiplicity, avg_j_values
-    return 'multiplet', None
+import numpy as np
 
 def calculate_j_vals(peaks, multiplicity, frequency):
     """
     Calculate J values from a list of peak positions and a given multiplicity.
-    Note: Fails with inputs like multiplicity is singlet or multiplet. 
 
     Parameters
     ----------
@@ -430,3 +229,14 @@ def calculate_j_vals(peaks, multiplicity, frequency):
     final_j_vals = [rank_to_j[r] for r in rank_pattern]
 
     return final_j_vals
+
+# --- Example usage ---
+td_peaks = [
+    3.98875,  # 4.00 - 0.00875 - 0.0025  # 4.00 - 0.00875 + 0.0025
+]
+frequency = 400.0  # MHz
+test_multiplicity = "s"
+
+calculated_j_td = calculate_j_vals(td_peaks, test_multiplicity, frequency)
+print("Peaks (td):", td_peaks)
+print("Calculated J values (td):", calculated_j_td)

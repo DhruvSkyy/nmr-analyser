@@ -13,12 +13,7 @@ Multiplicity: multiplet
 J-values: None
 Groups: Alkyne , Methyl (double bond/aromatic) , Methyl (CO-CH3)
 
-Peaks: 3.30 - 3.35 ppm
-Multiplicity: multiplet
-J-values: None
-Groups: N-Methyl , Methoxy
-
-Peaks: 3.39 - 3.43 ppm
+Peaks: 3.30 - 3.43 ppm
 Multiplicity: multiplet
 J-values: None
 Groups: N-Methyl , Methoxy
