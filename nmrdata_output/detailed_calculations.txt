@@ -3,38 +3,33 @@ J-values: None
 Groups: 
 All Multiplicities: None
 
-Peaks: 3.78806, 3.79703, 3.81369, 3.82266
-J-values: 4.48540, 12.81544, 4.48540
-Groups: Alkoxy , Methoxy , Methylene (CH2-O)
+Peaks: 1.96356, 1.97367, 1.98599, 1.99922, 2.01099
+J-values: 6.06661, 7.39023, 7.94174, 7.05932
+Groups: Methyl (double bond/aromatic) , Methyl (CO-CH3)
+All Multiplicities: quintet
+
+Peaks: 2.02220, 2.03121, 2.04132, 2.05162, 2.06228, 2.07460
+J-values: 5.40479, 6.06661, 6.17691, 6.39751, 7.39023
+Groups: Alkyne , Methyl (double bond/aromatic) , Methyl (CO-CH3)
+All Multiplicities: dt, hex, td
+
+Peaks: 2.31891, 2.33050, 2.33325, 2.34024, 2.34355, 2.35476
+J-values: 6.94902, 1.65453, 4.19147, 1.98543, 6.72842
+Groups: Alkyne , Methyl (double bond/aromatic) , Methyl (CO-CH3)
+All Multiplicities: dt, hex, td
+
+Peaks: 3.30281, 3.31457, 3.32229, 3.32652, 3.33388, 3.34601
+J-values: 7.05932, 4.63268, 2.53694, 4.41208, 7.27993
+Groups: N-Methyl , Methoxy
+All Multiplicities: dt, hex, td
+
+Peaks: 3.38848, 3.40006, 3.40796, 3.41182, 3.41936, 3.43113
+J-values: 6.94902, 4.74298, 2.31634, 4.52238, 7.05932
+Groups: N-Methyl , Methoxy
+All Multiplicities: dt, hex, td
+
+Peaks: 4.10525, 4.11628, 4.11996, 4.13062
+J-values: 6.61812, 2.20604, 6.39751
+Groups: Alkoxy , Methylene (CH2-O)
 All Multiplicities: dd, q
-
-Peaks: 3.90487, 3.91054, 3.93617
-J-values: 2.83770, 12.81544
-Groups: Alkoxy , Methylene (CH2-O)
-All Multiplicities: t
-
-Peaks: 4.10277, 4.10881, 4.11193, 4.11504, 4.12053, 4.12346, 4.12950, 4.18497, 4.19596, 4.20768
-J-values: 3.02078, 1.55616, 1.55616, 2.74617, 1.46462, 3.02078, 27.73628, 5.49233, 5.85849
-Groups: Alkoxy , Methylene (CH2-O)
-All Multiplicities: multiplet
-
-Peaks: 4.28969, 4.29793, 4.30837
-J-values: 4.11925, 5.21772
-Groups: Alkoxy , Methylene (CH2-O)
-All Multiplicities: t
-
-Peaks: 5.88558, 5.89364
-J-values: 4.02771
-Groups: Alkene , Acetal
-All Multiplicities: d
-
-Peaks: 6.03772, 6.05292
-J-values: 7.59773
-Groups: Alkene
-All Multiplicities: d
-
-Peaks: 7.82145, 7.83664
-J-values: 7.59773
-Groups: Aromatic
-All Multiplicities: d
 

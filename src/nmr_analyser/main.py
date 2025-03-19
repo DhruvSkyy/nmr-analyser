@@ -152,7 +152,7 @@ def validate_file(arg):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="NMR Peak Analysis Tool")
     parser.add_argument("--file", type=validate_file, required=True, help="Input file path")
-    parser.add_argument("--extra", type=int, default=10, help="Extra clusters to consider during analysis")
+    parser.add_argument("--extra", type=int, default=0, help="Extra clusters to consider during analysis")
     parser.add_argument("--uncertainty", type=float, default=1.0, help="Uncertainty tolerance for multiplicity matching")
     parser.add_argument("--frequency", type=float, required=True, help="NMR frequency (optional, default is 400.0 MHz)")
     args = parser.parse_args()

@@ -263,6 +263,7 @@ def cluster_and_rank_j_values(j_values, uncertainty=1.0):
     rank_map = {label: rank + 1 for rank, label in enumerate(sorted_clusters)}
     return [rank_map[label] for label in labels]
 
+
 def match_peaks_to_multiplicity(peaks, multiplicities, frequency, uncertainty=1.0):
     """
     Match observed peak positions to one of several expected multiplicity patterns.
@@ -328,11 +329,7 @@ def match_peaks_to_multiplicity(peaks, multiplicities, frequency, uncertainty=1.
 
         # Compare to the "expected" pattern from generate_j_pattern(m)
         expected_pattern = generate_j_pattern(m)  # e.g. [1,2,2,1]
-        
-        if m == 'dt':
-            print(j_vals)
-            print(j_ranks)
-            print(expected_pattern)
+
         if j_ranks == expected_pattern:
             matched_patterns.append(m)
             stored_j_vals_and_ranks.append((m, j_vals, j_ranks))
@@ -359,45 +356,68 @@ def match_peaks_to_multiplicity(peaks, multiplicities, frequency, uncertainty=1.
     # Return the adjacent J-values from the raw peaks so user can see raw spacing.
     return 'multiplet', '', _adjacent_j_values(peaks, frequency)
 
-
 def _adjacent_j_values(peaks, frequency):
     """
     Helper function to convert consecutive peak differences (in ppm) into Hz.
     """
-    sorted_peaks = np.sort(peaks)
-    diffs_ppm = np.diff(sorted_peaks)
+    diffs_ppm = np.diff(peaks)
     diffs_hz = [d * frequency for d in diffs_ppm]
     return diffs_hz
 
-
 def calculate_j_vals(peaks, multiplicity, frequency):
-    peaks = np.sort(peaks)
+    """
+    Calculate J-values for a given set of NMR peaks and a multiplicity notation.
+
+    This function iteratively groups and averages peak positions based on the multiplicity. 
+    
+    At each step:
+      1. The peak list is divided into subgroups of equal length.
+      2. J-values (Hz) are computed as differences between adjacent peaks.
+      3. J-values are placed according to a ranking pattern.
+      4. The peak list is replaced with mean values of the subgroups, preparing for the next iteration.
+
+    Parameters
+    ----------
+    peaks : array-like
+        Chemical shift peak positions (ppm).
+    multiplicity : str
+        Multiplicity notation ('d', 't', 'q', 'dt', etc.).
+    frequency : float
+        Spectrometer frequency (MHz), used to convert ppm differences to Hz.
+
+    Returns
+    -------
+    list of float
+        The final list of J-values (Hz), ordered according to the multiplicity pattern.
+    """
+
     line_counts = multiplicity_to_line_count(multiplicity)
 
+    # Handle simple cases (e.g., just a singlet, doublet, triplet, etc.)
     if len(line_counts) == 1:
-        adj_diffs_hz = np.diff(peaks) * frequency
-        return adj_diffs_hz.tolist()
+        return _adjacent_j_values(peaks, frequency)
 
-    line_counts_reversed = line_counts[::-1]
+    line_counts_reversed = line_counts[::-1] 
     current_peaks = peaks.copy()
-    rank_pattern = generate_j_pattern(multiplicity)
-    final_j_vals = [0] * len(rank_pattern)
+    rank_pattern = generate_j_pattern(multiplicity)  # Defines J-value placement
+    final_j_vals = [0] * len(rank_pattern)  # Placeholder list for final J-values
 
     for iteration, n in enumerate(line_counts_reversed):
-        rank_number = iteration + 1
-        n_groups = len(current_peaks) // n
+        rank_number = iteration + 1  # Define current "rank" of J-value placement
+        n_groups = len(current_peaks) // n  # Number of peak subgroups
         groups = [current_peaks[i * n:(i + 1) * n] for i in range(n_groups)]
 
+        # Compute J-values for this iteration by measuring differences within subgroups
         j_vals_iteration = []
         for g in groups:
-            diffs = np.diff(g) * frequency
-            j_vals_iteration.extend(diffs.tolist())
+            j_vals_iteration.extend((np.diff(g) * frequency).tolist())
 
-        # Fill in the final_j_vals array at positions matching current rank number
+        # Assign computed J-values to the appropriate positions in final_j_vals
         indices_to_fill = [i for i, rank in enumerate(rank_pattern) if rank == rank_number]
         for idx, val in zip(indices_to_fill, j_vals_iteration):
             final_j_vals[idx] = val
 
+        # Reduce peak list by replacing subgroups with their mean positions
         current_peaks = np.array([np.mean(g) for g in groups])
 
     return final_j_vals
