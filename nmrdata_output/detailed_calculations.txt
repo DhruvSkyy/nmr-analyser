@@ -1,35 +1,25 @@
-Peaks: 0.00000
-J-values: None
-Groups: 
-All Multiplicities: None
+Peaks: 2.85495, 2.86704, 2.87912
+J-values: 7.25137, 7.25137
+Groups: Alkyne
+All Multiplicities: t
 
-Peaks: 1.96356, 1.97367, 1.98599, 1.99922, 2.01099
-J-values: 6.06661, 7.39023, 7.94174, 7.05932
-Groups: Methyl (double bond/aromatic) , Methyl (CO-CH3)
-All Multiplicities: quintet
+Peaks: 3.20946, 3.22155, 3.23363
+J-values: 7.25137, 7.25137
+Groups: N-Methyl
+All Multiplicities: t
 
-Peaks: 2.02220, 2.03121, 2.04132, 2.05162, 2.06228, 2.07460
-J-values: 5.40479, 6.06661, 6.17691, 6.39751, 7.39023
-Groups: Alkyne , Methyl (double bond/aromatic) , Methyl (CO-CH3)
-All Multiplicities: dt, hex, td
-
-Peaks: 2.31891, 2.33050, 2.33325, 2.34024, 2.34355, 2.35476
-J-values: 6.94902, 1.65453, 4.19147, 1.98543, 6.72842
-Groups: Alkyne , Methyl (double bond/aromatic) , Methyl (CO-CH3)
-All Multiplicities: dt, hex, td
-
-Peaks: 3.30281, 3.31457, 3.32229, 3.32652, 3.33388, 3.34601
-J-values: 7.05932, 4.63268, 2.53694, 4.41208, 7.27993
-Groups: N-Methyl , Methoxy
-All Multiplicities: dt, hex, td
-
-Peaks: 3.38848, 3.40006, 3.40796, 3.41182, 3.41936, 3.43113
-J-values: 6.94902, 4.74298, 2.31634, 4.52238, 7.05932
-Groups: N-Methyl , Methoxy
-All Multiplicities: dt, hex, td
-
-Peaks: 4.10525, 4.11628, 4.11996, 4.13062
-J-values: 6.61812, 2.20604, 6.39751
-Groups: Alkoxy , Methylene (CH2-O)
+Peaks: 6.73956, 6.74304, 6.75311, 6.75659
+J-values: 2.08751, 8.13032, 2.08751
+Groups: Aromatic
 All Multiplicities: dd, q
+
+Peaks: 6.84485, 6.84833
+J-values: 2.08751
+Groups: Aromatic
+All Multiplicities: d
+
+Peaks: 6.89228, 6.90583
+J-values: 8.13032
+Groups: Aromatic
+All Multiplicities: d
 

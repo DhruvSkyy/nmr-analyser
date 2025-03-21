@@ -1,35 +1,24 @@
-Peaks: 0.00 ppm
-Multiplicity: s
-J-values: None
-Groups: 
+Peak: 2.85 ppm
+Multiplicity: t
+J-values: 7.3
+Groups: Alkyne
 
-Peaks: 1.96 ppm
-Multiplicity: quintet
-J-values: 7.1
-Groups: Methyl (double bond/aromatic) , Methyl (CO-CH3)
+Peak: 3.21 ppm
+Multiplicity: t
+J-values: 7.3
+Groups: N-Methyl
 
-Peaks: 2.02 - 2.07 ppm
-Multiplicity: multiplet
-J-values: None
-Groups: Alkyne , Methyl (double bond/aromatic) , Methyl (CO-CH3)
+Peak: 6.74 ppm
+Multiplicity: dd
+J-values: 2.1, 8.1
+Groups: Aromatic
 
-Peaks: 2.32 ppm
-Multiplicity: hex
-J-values: 4.3
-Groups: Alkyne , Methyl (double bond/aromatic) , Methyl (CO-CH3)
+Peak: 6.84 ppm
+Multiplicity: d
+J-values: 2.1
+Groups: Aromatic
 
-Peaks: 3.30 - 3.35 ppm
-Multiplicity: multiplet
-J-values: None
-Groups: N-Methyl , Methoxy
-
-Peaks: 3.39 - 3.43 ppm
-Multiplicity: multiplet
-J-values: None
-Groups: N-Methyl , Methoxy
-
-Peaks: 4.11 - 4.13 ppm
-Multiplicity: multiplet
-J-values: None
-Groups: Alkoxy , Methylene (CH2-O)
-
+Peak: 6.89 ppm
+Multiplicity: d
+J-values: 8.1
+Groups: Aromatic

@@ -16,7 +16,7 @@ from j_val import (
     match_peaks_to_multiplicity,
 )
 
-def nmr_peak_analysis(peaks, k, frequency, uncertainty=1.0, extra=10):
+def nmr_peak_analysis(peaks, k, frequency, uncertainty=1.0, extra=0):
     """
     Clusters NMR peaks, assigns functional groups, classifies multiplets, and
     prints ordered peaks with multiplicity and J values in the standard NMR format.
@@ -30,8 +30,11 @@ def nmr_peak_analysis(peaks, k, frequency, uncertainty=1.0, extra=10):
     for path in [detailed_path, simple_path]:
         if os.path.exists(path):
             os.remove(path)
+    
+    if k > len(peaks): # Potential error when k is input again by user. 
+        raise ValueError("K is higher than the number of peaks available.")
 
-    max_k = min(k + extra, len(peaks))
+    max_k = min(k + extra, len(peaks)) # In the case extra leads to more k than peaks 
     min_multiplets, best_k = float('inf'), k
 
     for current_k in range(k, max_k + 1):
@@ -100,11 +103,10 @@ def write_detailed_output(f, peaks, j_vals, groups, all_multiplicities):
     f.write(f"Peaks: {peaks_str}\nJ-values: {j_vals_str}\nGroups: {groups_str}\nAll Multiplicities: {mult_str}\n\n")
 
 def write_simple_output(f, peaks, best_match, j_vals, groups):
-    """Writes simplified peak, multiplicity, and group info to file."""
     range_str = f"{min(peaks):.2f} - {max(peaks):.2f} ppm" if best_match == "multiplet" else f"{peaks[0]:.2f} ppm"
     j_vals_str = ', '.join(f"{j:.1f}" for j in j_vals) if j_vals else "None"
     groups_str = " , ".join(groups)
-    f.write(f"Peaks: {range_str}\nMultiplicity: {best_match}\nJ-values: {j_vals_str}\nGroups: {groups_str}\n\n")
+    f.write(f"Peak: {range_str}\nMultiplicity: {best_match}\nJ-values: {j_vals_str}\nGroups: {groups_str}\n\n")
 
 
 def main(path, frequency, uncertainty=1.0, extra=10):

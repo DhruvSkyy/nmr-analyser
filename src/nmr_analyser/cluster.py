@@ -25,7 +25,7 @@ CHEMICAL_SHIFT_RANGES = {
 }
 
 # Adapted from https://stanford.edu/~cpiech/cs221/handouts/kmeans.html
-# tolerance/ maxiter from https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html
+# Tolerance/ max_iter from https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html
 def kmeans_clustering(data, k, max_iter=300, tol=1e-4, random_state=42):
     """
     Perform K-Means clustering on the given dataset.

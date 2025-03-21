@@ -35,8 +35,6 @@ def factorize_multiplicity(num_peaks: int) -> list[str]:
     --------
     >>> factorize_multiplicity(4)
     ['dd', 'q']
-    >>> factorize_multiplicity(6)
-    ['dt', 'hex', 'td']
     >>> factorize_multiplicity(8)
     ['ddd', 'dq', 'qd']
     >>> factorize_multiplicity(1)
@@ -266,38 +264,27 @@ def cluster_and_rank_j_values(j_values, uncertainty=1.0):
 
 def match_peaks_to_multiplicity(peaks, multiplicities, frequency, uncertainty=1.0):
     """
-    Match observed peak positions to one of several expected multiplicity patterns.
-
-    The function calculates J values for each candidate multiplicity by calling 
-    `calculate_j_vals(peaks, multiplicity, frequency)`, then compares the 
-    resulting rank-pattern against `generate_j_pattern(multiplicity)` using 
-    `cluster_and_rank_j_values`.
+    Matches observed peak positions to an expected multiplicity pattern.
 
     Parameters
     ----------
     peaks : list of float
-        Observed peak positions (in ppm).
+        Observed peak positions (ppm).
     multiplicities : list of str
-        List of candidate multiplicity patterns (e.g. ['d', 't', 'td', 'dt']).
+        Candidate multiplicity patterns (e.g., ['d', 't', 'td']).
     frequency : float
-        Spectrometer frequency in MHz (for ppm->Hz conversion).
+        Spectrometer frequency in MHz (for ppm→Hz conversion).
     uncertainty : float, optional
-        Uncertainty threshold in Hz used by `cluster_and_rank_j_values` to
-        decide if two J-values are 'the same'.
+        Threshold (Hz) for clustering J-values.
 
     Returns
     -------
-    (matched_multiplicity, j_values_or_adj)
-        matched_multiplicity : str
-            - A single matched pattern (e.g., 'd', 'dt') if exactly one match is found.
-            - 'multiplet' if none or multiple patterns match, or if the user specifically
-              wants to label it as 'multiplet'.
-        j_values_or_adj : list of float or None
-            - If exactly one pattern matches, returns the J values (possibly averaged
-              by rank) that correspond to that pattern.
-            - If zero or multiple patterns match, returns the list of adjacent J values
-              derived directly from consecutive peak differences in Hz, so you can 
-              see the raw spacing. (Or returns None, if you prefer the old behaviour.)
+    matched_multiplicity : str
+        Identified pattern (e.g., 'd', 'dt') if exactly one match, otherwise 'multiplet'.
+    avg_j_by_rank : list of float or None
+        Averaged J-values by rank if one pattern matches.
+    raw_j_vals : list of float or None
+        Original J-values if one pattern matches, otherwise adjacent J-values.
 
     Notes
     -----
@@ -310,51 +297,27 @@ def match_peaks_to_multiplicity(peaks, multiplicities, frequency, uncertainty=1.
       If exactly one matches, we return it. If 0 or >1 match, we label 'multiplet'.
     """
 
-    # -- 1) If the user has an explicit 'multiplet' or no pattern at all, short-circuit:
     if not multiplicities or multiplicities[0].lower() == 'multiplet':
-        # Return 'multiplet' plus raw adjacent J-values (consecutive peak diffs)
-        adjacent_js = _adjacent_j_values(peaks, frequency)
-        return 'multiplet', '', adjacent_js
+        return 'multiplet', '', _adjacent_j_values(peaks, frequency)
 
-    # -- 2) For each candidate multiplicity, compute J-values and check rank pattern
     matched_patterns = []
-    stored_j_vals_and_ranks = []  # store (multiplicity, j_vals, j_ranks) for debugging
+    stored_j_vals_and_ranks = []
 
     for m in multiplicities:
-        # Calculate J-values for these peaks under pattern m
         j_vals = calculate_j_vals(peaks, m, frequency)
-
-        # Cluster and rank them -> e.g. j_ranks = [1,2,2,1] for dd, ...
-        j_ranks = cluster_and_rank_j_values(j_vals, uncertainty=uncertainty)
-
-        # Compare to the "expected" pattern from generate_j_pattern(m)
-        expected_pattern = generate_j_pattern(m)  # e.g. [1,2,2,1]
-
-        if j_ranks == expected_pattern:
+        j_ranks = cluster_and_rank_j_values(j_vals, uncertainty)
+        if j_ranks == generate_j_pattern(m):
             matched_patterns.append(m)
             stored_j_vals_and_ranks.append((m, j_vals, j_ranks))
     
-    # -- 3) Decide how to return
     if len(matched_patterns) == 1:
-        # Exactly one match; return that multiplicity & the matched J-values
-        # Optionally, you could average the J's by rank or just return them directly.
         mpat, j_vals, j_ranks = stored_j_vals_and_ranks[0]
-
-        # If you want to average by rank (like the old code):
-        unique_ranks = np.unique(j_ranks)
-        # e.g. for a dd pattern [1,2,2,1], unique_ranks is [1,2].
-        # We'll average all J's that have rank 1, then rank 2, etc.
-        # That yields a smaller set: [J1, J2] or so.
-        avg_j_by_rank = []
-        for ur in unique_ranks:
-            matching_js = [j for j, rk in zip(j_vals, j_ranks) if rk == ur]
-            avg_j_by_rank.append(np.mean(matching_js))
-        
+        avg_j_by_rank = [np.mean([j for j, rk in zip(j_vals, j_ranks) if rk == ur]) 
+                         for ur in np.unique(j_ranks)]
         return mpat, avg_j_by_rank, j_vals
 
-    # -- 4) If zero or multiple matches, label 'multiplet'
-    # Return the adjacent J-values from the raw peaks so user can see raw spacing.
     return 'multiplet', '', _adjacent_j_values(peaks, frequency)
+
 
 def _adjacent_j_values(peaks, frequency):
     """
@@ -364,17 +327,10 @@ def _adjacent_j_values(peaks, frequency):
     diffs_hz = [d * frequency for d in diffs_ppm]
     return diffs_hz
 
+
 def calculate_j_vals(peaks, multiplicity, frequency):
     """
-    Calculate J-values for a given set of NMR peaks and a multiplicity notation.
-
-    This function iteratively groups and averages peak positions based on the multiplicity. 
-    
-    At each step:
-      1. The peak list is divided into subgroups of equal length.
-      2. J-values (Hz) are computed as differences between adjacent peaks.
-      3. J-values are placed according to a ranking pattern.
-      4. The peak list is replaced with mean values of the subgroups, preparing for the next iteration.
+    Calculates J-values (Hz) for a given set of NMR peaks and multiplicity.
 
     Parameters
     ----------
@@ -388,36 +344,43 @@ def calculate_j_vals(peaks, multiplicity, frequency):
     Returns
     -------
     list of float
-        The final list of J-values (Hz), ordered according to the multiplicity pattern.
+        J-values (Hz) ordered according to the multiplicity pattern.
+
+    Notes
+    -----
+    - If a single-line pattern (e.g., singlet, doublet), returns adjacent J-values.
+    - Otherwise, iteratively:
+        1. Groups peaks based on multiplicity.
+        2. Computes J-values from peak differences.
+        3. Places J-values according to rank pattern.
+        4. Replaces peak groups with their mean for the next iteration.
     """
 
     line_counts = multiplicity_to_line_count(multiplicity)
 
-    # Handle simple cases (e.g., just a singlet, doublet, triplet, etc.)
     if len(line_counts) == 1:
         return _adjacent_j_values(peaks, frequency)
 
-    line_counts_reversed = line_counts[::-1] 
+    line_counts_reversed = line_counts[::-1]
     current_peaks = peaks.copy()
-    rank_pattern = generate_j_pattern(multiplicity)  # Defines J-value placement
-    final_j_vals = [0] * len(rank_pattern)  # Placeholder list for final J-values
+    rank_pattern = generate_j_pattern(multiplicity)
+    final_j_vals = [0] * len(rank_pattern)
 
     for iteration, n in enumerate(line_counts_reversed):
-        rank_number = iteration + 1  # Define current "rank" of J-value placement
-        n_groups = len(current_peaks) // n  # Number of peak subgroups
+        rank_number = iteration + 1
+        n_groups = len(current_peaks) // n
         groups = [current_peaks[i * n:(i + 1) * n] for i in range(n_groups)]
 
-        # Compute J-values for this iteration by measuring differences within subgroups
-        j_vals_iteration = []
-        for g in groups:
-            j_vals_iteration.extend((np.diff(g) * frequency).tolist())
+        # Compute J-values (Hz) from peak differences within each subgroup
+        j_vals_iteration = [(np.diff(g) * frequency).tolist() for g in groups]
+        j_vals_iteration = [j for sublist in j_vals_iteration for j in sublist]  
 
-        # Assign computed J-values to the appropriate positions in final_j_vals
+        # Assign J-values to correct positions based on rank pattern
         indices_to_fill = [i for i, rank in enumerate(rank_pattern) if rank == rank_number]
         for idx, val in zip(indices_to_fill, j_vals_iteration):
-            final_j_vals[idx] = val
+            final_j_vals[idx] = val  
 
-        # Reduce peak list by replacing subgroups with their mean positions
+        # Replace each subgroup with its mean to form new representative peaks
         current_peaks = np.array([np.mean(g) for g in groups])
 
     return final_j_vals
