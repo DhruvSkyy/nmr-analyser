@@ -1,0 +1,6 @@
+¹H NMR (600 MHz)
+δ 2.85 ppm (t, J = 7.25 Hz, possible groups: Alkyne)
+δ 3.21 ppm (t, J = 7.25 Hz, possible groups: N-Methyl)
+δ 6.74 ppm (dd, J = 2.09, 8.13 Hz, possible groups: Aromatic)
+δ 6.84 ppm (d, J = 2.09 Hz, possible groups: Aromatic)
+δ 6.89 ppm (d, J = 8.13 Hz, possible groups: Aromatic)

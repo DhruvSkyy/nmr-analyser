@@ -164,7 +164,7 @@ def find_peaks(y, height):
     
     return peaks
 
-def detect_and_plot_peaks(x, y, threshold_baseline, xlim=None, clusters=None):
+def detect_and_plot_peaks(x, y, threshold_baseline, save_path, xlim=None, clusters=None):
     """
     Detects and plots peaks in the given data with a wide, detailed NMR spectrum style.
     Optionally highlights peaks in different colours based on clusters.
@@ -177,6 +177,8 @@ def detect_and_plot_peaks(x, y, threshold_baseline, xlim=None, clusters=None):
         Y-axis data (Intensity).
     threshold_baseline : float
         Minimum height for peak detection.
+    save_path : path
+        Path to save plot image. 
     xlim : tuple of (float, float), optional
         X-axis limits as (min, max). Defaults to the full range of x data.
     clusters : dict, optional
@@ -218,12 +220,12 @@ def detect_and_plot_peaks(x, y, threshold_baseline, xlim=None, clusters=None):
         plt.xlim(xhigh, xlow)
 
     plt.xlabel("Chemical Shift (ppm)", fontsize=12)
-    plt.ylabel("Intensity (a.u.)", fontsize=12)
-    plt.title("1H NMR Spectrum", fontsize=14)
+    plt.ylabel("Intensity", fontsize=12)
+    plt.title("¹H NMR Spectrum", fontsize=14)
     if not clusters:
         plt.legend(loc="upper right", fontsize=10)
 
-    plt.savefig('nmrdata_output/compact_nmr_output.jpg', dpi=300, bbox_inches='tight')
+    plt.savefig(save_path, dpi=300, bbox_inches='tight')
     plt.show(block=False)
     
      # Get the y-axis scaling from the scientific notation
